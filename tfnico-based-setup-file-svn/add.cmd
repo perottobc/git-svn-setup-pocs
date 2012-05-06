@@ -1,5 +1,5 @@
 @echo --------------------------------------------------------------------------------------------------
-@echo Script creates a file and goes through the loop of getting it into subversion thourgh git, arg: %1
+@echo Script creates a file and pushes it to the bare repo
 
 set FILE=file_%1%
 
