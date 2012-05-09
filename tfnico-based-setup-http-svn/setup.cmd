@@ -1,4 +1,4 @@
-:: This setup uses pre-created svn repo at objectdesign and applies the steps from http://blog.tfnico.com/2010/11/git-svn-mirror-for-multiple-branches.html.
+:: This setup uses a setup described by http://blog.tfnico.com/2010/11/git-svn-mirror-for-multiple-branches.html.
 :: The change is this setup is that the devs should push back to the bare-repo and let a dedicated commit-repo do the job with dcomming to svn.
 
 call ../check_env_var.cmd
@@ -9,7 +9,7 @@ mkdir %WDIR%\repos
 @echo ----------------------------------
 @echo 1. Clone Subversion repo
 cd %WDIR%/repos
-call git svn clone -s http://www.objectdesign.no/svn_repos/company-repo/websites
+call git svn clone -s http://localhost/svn-repos/company-repo/websites --username per
 
 cd %WDIR%/repos/websites
 call git svn fetch
@@ -62,7 +62,7 @@ cd websites.commit-repo
 call git checkout -t mirror/trunk
 call git pull --rebase
 
-call git svn init --prefix=mirror/ -s http://www.objectdesign.no/svn_repos/company-repo/websites
+call git svn init --prefix=mirror/ -s http://localhost/svn-repos/company-repo/websites
 
 cd %WDIR%
 
