@@ -1,0 +1,9 @@
+<Location /svn-repos>
+  DAV svn
+  SVNParentPath %WDIR%\apache-httpd-svn-repos
+  SVNListParentPath on
+  AuthType Basic
+  AuthName "Subversion repository"
+  AuthUserFile %WDIR%\apache-httpd-svn-repos\svn-auth-file
+  Require valid-user
+</Location>

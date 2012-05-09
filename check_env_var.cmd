@@ -1,27 +1,18 @@
+SET HTPASSWD_EXE="C:\Program Files (x86)\Apache Software Foundation\Apache2.2\bin\htpasswd"
+
 @echo off
-if "%WDIR_DRIVE%" == "" GOTO WDIR_DRIVE_EXIT
-@echo Working dir drive set to %WDIR_DRIVE%
-
-if '%WDIR_NAME%' == '' GOTO WDIR_NAME_EXIT
-@echo Wording dir name set to %WDIR_NAME%
-
-SET WDIR=%WDIR_DRIVE%\%WDIR_NAME%
-@echo Workding dir is %WDIR%
-
-SET SVN_FILE_PARENT_PATH=file:///%WDIR_DRIVE%/%WDIR_NAME%
-@echo Parent path for svn-repo is %SVN_FILE_PARENT_PATH%
+if "%WDIR%" == "" GOTO WDIR_EXIT
+@echo Working directory set to %WDIR%
 
 if '%EDITOR%' == '' GOTO EDITOR_EXIT
 @echo Editor set to %EDITOR%
 
+@echo htpasswd set to %HTPASSWD_EXE%
+
 GOTO CONTINUE_SETUP
 
-:WDIR_DRIVE_EXIT
-@echo Define a drive for the working directory, e.g.:  set WDIR_DRIVE=e:
-Exit /b
-
-:WDIR_NAME_EXIT
-@echo Define a name for the working directory, e.g. set WDIR_NAME=tmp
+:WDIR
+@echo Define working directory where testing will be done, e.g.:  set WDIR=e:\
 Exit /b
 
 :EDITOR_EXIT
@@ -29,3 +20,4 @@ Exit /b
 Exit /b
 
 :CONTINUE_SETUP
+SET ENV_CHECKED=OK
