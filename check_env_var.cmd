@@ -2,7 +2,7 @@
 if "%WDIR_DRIVE%" == "" GOTO WDIR_DRIVE_EXIT
 @echo Working dir drive set to %WDIR_DRIVE%
 
-if "%WDIR_NAME%" == "" GOTO WDIR_NAME_EXIT
+if '%WDIR_NAME%' == '' GOTO WDIR_NAME_EXIT
 @echo Wording dir name set to %WDIR_NAME%
 
 SET WDIR=%WDIR_DRIVE%\%WDIR_NAME%
