@@ -6,7 +6,7 @@ Exit /b
 :DOIT
 @echo on
 
-cd %WDIR%\devs\per\websites\trunk
+cd %WDIR%\devs\per\svn\websites\trunk
 call mvn --batch-mode release:branch -DbranchName=yksi
 call mvn --batch-mode release:branch -DbranchName=kaksi
  

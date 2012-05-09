@@ -7,9 +7,10 @@ Exit /b
 @echo on
 
 mkdir %WDIR%\devs
-svn co http://localhost/svn-repos/company-repo %WDIR%\devs\per --username per --password secure
-xcopy company_repo_template %WDIR%\devs\per  /S /E
+mkdir %WDIR%\devs\per
+svn co http://localhost/svn-repos/company-repo %WDIR%\devs\per\svn --username per --password secure
+xcopy company_repo_template %WDIR%\devs\per\svn  /S /E
 
-cd %WDIR%\devs\per
+cd %WDIR%\devs\per\svn
 svn add websites
 svn commit -m"Initial directory structure created for websites"
