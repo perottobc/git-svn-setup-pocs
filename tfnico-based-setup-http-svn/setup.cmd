@@ -9,7 +9,7 @@ mkdir %WDIR%\repos
 @echo ----------------------------------
 @echo 1. Clone Subversion repo
 cd %WDIR%/repos
-call git svn clone -s http://localhost/svn-repos/company-repo/websites --username per
+call git svn clone -s http://localhost/svn-repos/company-repo/websites --username adm
 
 cd %WDIR%/repos/websites
 call git svn fetch

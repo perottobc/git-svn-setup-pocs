@@ -9,7 +9,8 @@ Exit /b
 set APACHE_SVN_REPOS=%WDIR%\apache-httpd-svn-repos
 mkdir %APACHE_SVN_REPOS%
 
-%HTPASSWD_EXE% -c -b %APACHE_SVN_REPOS%\svn-auth-file ida secure
+%HTPASSWD_EXE% -c -b %APACHE_SVN_REPOS%\svn-auth-file adm secure
+%HTPASSWD_EXE% -b %APACHE_SVN_REPOS%\svn-auth-file ida secure
 %HTPASSWD_EXE% -b %APACHE_SVN_REPOS%\svn-auth-file per secure
 %HTPASSWD_EXE% -b %APACHE_SVN_REPOS%\svn-auth-file siv secure
 

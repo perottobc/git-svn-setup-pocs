@@ -1,56 +1,88 @@
-// http://groovy.codehaus.org/Executing+External+Processes+From+Groovy
 class GitExecutable {
     String gitRepoDir;
 	def ant = new AntBuilder();
 	
+	def git(String command ) {
+		git(command, "");
+	}
+	
 	def git(String command,String argument) {		
 		println(command + " " + argument );		
-		ant.exec(executable:"git",dir:gitRepoDir,failonerror: "true") {
+		ant.exec(executable:"git",dir:gitRepoDir,resultproperty:"cmdExit") {
 			arg(value:command)
-			if( null != argument ) { 
+			if( "" != argument ) { 
 				arg(value:argument)
 			}
-		}						
+		}
+		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );						
 	}
 }
 
-class GitDev extends GitExecutable {
+class Dev extends GitExecutable {
 	String username
-	String branch
+	String branch	
 	String wdir = System.getenv()['WDIR'];	
+	String projectDir;
+	List addedFiles;
 	
-	public GitDev(String _username, String _branch) {		
-		if( null == wdir ) throw new RuntimeException("Env variable WDIR must be set");
-		
-		username=_username;
-		branch=_branch;		
+	public Dev(String _username) {		
+		if( null == wdir ) throw new RuntimeException("Env variable WDIR must be set");		
+		username=_username;				
 		gitRepoDir=wdir+"/devs/"+username+"/git_websites";		
 	}
 
-	def test(Integer testRunIndex) {	
-		println("start")
-		
-		String file="hello-from-"+branch+"-"+testRunIndex+".html";
-		String testfile = "web/src/main/webapp/"+ username + "-" + file;
-		
-		println( "Test username ["+username+"], branch ["+branch+"], testfile["+testfile+"]");
-
-		git("checkout",branch);
-		git("pull","--rebase");
-		ant.copy(file:"./dev_src_templates/hello.html",tofile:gitRepoDir + "/" + testfile); 
-		git("add",testfile);	
-		git("commit","-m'"+username+" added "+testfile+" on "+branch+"'");
-		git("push",null );
-			
-		println("done")
+	def git() {	    
+		println( "--- " + username + " Working on git repo ---" );
+		addedFiles = new ArrayList(); 
+		return this;		
 	}
+	
+	def checkout(String branch) {
+		this.branch = branch;
+		git("checkout",branch);
+		return this;
+	}
+	
+	def chdir(String dir) {
+		projectDir = dir;
+		return this;
+	}
+	
+	def add(String ... files) {
+		def targetDir = gitRepoDir + "/" + projectDir;
+		println( "copy files: " + files + " to [" + targetDir + "]");
+		for( file in files ) {
+			ant.copy(file:"./dev_src_templates/" + file,todir:targetDir );
+			git("add",targetDir + "/" + file );
+			addedFiles.add( file );
+		}
+		
+		return this;
+	}
+	
+	def commit() {
+		git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
+		return this;
+	}
+
+	def push() {
+		git("push" );
+		return this;
+	}
+	
 }
 
-def siv = new GitDev("siv","yksi");
-def ola = new GitDev("ola","kaksi");
-def per = new GitDev("per","trunk");
+def per = new Dev("per");
+def siv = new Dev("siv");
+def ola = new Dev("ola");
 
-siv.test(409);
+ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-hello.html", "ola-world.html" ).commit().push();
+siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-hello.html", "siv-world.html" ).commit().push();
+per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-hello.html", "per-world.html" ).commit().push();
+
+
+
+
 
 
 
