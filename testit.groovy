@@ -70,16 +70,31 @@ class Dev extends GitExecutable {
 		return this;
 	}
 	
+	def touch_and_add(String file) {
+		def fullFilePath = gitRepoDir + "/" + projectDir + "/" + file;
+	    println( "touch_and_add: " +  fullFilePath )
+	    
+		ant.exec(executable:"touch",dir:gitRepoDir + "/" + projectDir,failonerror:true) {
+			arg(value:file)
+		}
+		git("add", fullFilePath );
+		addedFiles.add( file );
+		return this;
+	}
+	
 }
 
 def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
+/*
 ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-hello.html", "ola-world.html" ).commit().push();
 siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-hello.html", "siv-world.html" ).commit().push();
 per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-hello.html", "per-world.html" ).commit().push();
+*/
 
+ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
 
 
 
