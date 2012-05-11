@@ -151,10 +151,12 @@ class Dev extends ScmExecutable {
 	}
 
 	def svn_rebase() {
+		git("svn","rebase");
 		return this;
 	}
 	
 	def svn_dcommit() {
+		git("svn","dcommit");
 		return this;
 	}
 	
@@ -166,7 +168,6 @@ def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
-/*
 ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
 ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
 ola.svn().commit();
@@ -178,26 +179,18 @@ per.svn().commit();
 siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
 siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
 siv.svn().commit();
-*/
 
 
 jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 jenkins.git().checkout( "kaksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 jenkins.git().checkout( "yksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 
-println("VERIFY")
+println("Please verify!")
 
 
 /*
 ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
 */
-
-
-/*
-per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
-per.svn().commit();
-*/
-
 
 
 
