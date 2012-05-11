@@ -90,7 +90,7 @@ class Dev extends ScmExecutable {
 		if( SCM.git == currentSCM ) 
 			git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
 		else
-		    svn("commit", "-m'NO COMMENT YET'" );
+		    svn("commit", "-m'Commit from svn-user'" );
 		    
 		return this;
 	}
@@ -170,7 +170,6 @@ def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
-/*
 ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
 ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
 ola.svn().commit();
@@ -179,17 +178,10 @@ siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod"
 siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
 siv.svn().commit();
 
-per.svn().goto_branch( "trunk").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
+per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
 per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
 per.svn().commit();
-*/
 
-def ant = new AntBuilder();
-ant.exec(executable:"svn", resultproperty:"cmdExit")
-
-
-per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
-per.svn().commit();
 
 /*
 jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
@@ -201,6 +193,12 @@ println("VERIFY")
 
 /*
 ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
+*/
+
+
+/*
+per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
+per.svn().commit();
 */
 
 
