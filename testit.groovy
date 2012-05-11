@@ -22,21 +22,26 @@ class Dev extends GitExecutable {
 	String username
 	String branch	
 	String wdir = System.getenv()['WDIR'];	
-	String projectDir;
-	List addedFiles;
+	String projectDir
+	String currentFile
+	List addedFiles
 	
 	public Dev(String _username) {		
+		this( _username, "git_websites" ) 		
+	}
+
+	public Dev(String _username, String git_project_name ) {		
 		if( null == wdir ) throw new RuntimeException("Env variable WDIR must be set");		
 		username=_username;				
-		gitRepoDir=wdir+"/devs/"+username+"/git_websites";		
+		gitRepoDir=wdir+"/devs/"+username+"/" + git_project_name;		
 	}
 
 	def git() {	    
-		println( "--- " + username + " Working on git repo ---" );
+		println( "--- " + username + " Working on git repo --- " );
 		addedFiles = new ArrayList(); 
 		return this;		
 	}
-	
+		
 	def checkout(String branch) {
 		this.branch = branch;
 		git("checkout",branch);
@@ -81,21 +86,76 @@ class Dev extends GitExecutable {
 		addedFiles.add( file );
 		return this;
 	}
+		
+	// -- SVN STUFF
+	def svn() {	    
+		println( "--- " + username + " Working on svn repo ---" );		
+		return this;		
+	}
+	
+	def goto_branch( String branch ) {
+		return this;
+	}
+	
+	def on_file( String _currentFile ) {
+		currentFile = _currentFile;
+		return this;
+	}
+	
+	def append( String content ) {
+		
+		return this;
+	}
+	
+	// jenkins
+	def pull( String option ) {
+		return this;
+	}
+	
+	def svn_reset( Integer revision ) {
+		return this;
+	}
+
+	def svn_rebase() {
+		return this;
+	}
+	
+	def svn_dcommit() {
+		return this;
+	}
+	
+	
 	
 }
 
+def jenkins = new Dev( "adm", "websites.commit-repo" );
 def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
 /*
-ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-hello.html", "ola-world.html" ).commit().push();
-siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-hello.html", "siv-world.html" ).commit().push();
-per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-hello.html", "per-world.html" ).commit().push();
+ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
+ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
+ola.svn().commit();
+
+siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
+siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
+siv.svn().commit();
+
+per.svn().goto_branch( "trunk").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
+per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
+per.svn().commit();
 */
 
-ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
+jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
+jenkins.git().checkout( "kaksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
+jenkins.git().checkout( "yksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 
+println("VERIFY")
+
+/*
+ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
+*/
 
 
 
