@@ -1,4 +1,6 @@
 class ScmExecutable {
+	String username
+	
     String gitRepoDir;
     String svnRepoDir;
 	def ant = new AntBuilder();
@@ -8,7 +10,7 @@ class ScmExecutable {
 	}
 	
 	def git(String command,String argument) {		
-		println("GIT: " + command + " " + argument );		
+		println(username +" ->GIT: " + command + " " + argument );		
 		ant.exec(executable:"git",dir:gitRepoDir,resultproperty:"cmdExit") {
 			arg(value:command)
 			if( "" != argument ) { 
@@ -19,7 +21,7 @@ class ScmExecutable {
 	}
 	
 	def svn(String command,String argument) {		
-		println("SVN: " + command + " " + argument + " on " + svnRepoDir );		
+		println(username + " ->SVN: " + command + " " + argument + " on " + svnRepoDir );		
 		ant.exec(executable:"svn",dir:svnRepoDir,resultproperty:"cmdExit") {
 			arg(value:command)
 			if( "" != argument ) { 
@@ -36,7 +38,7 @@ enum SCM {
 
 
 class Dev extends ScmExecutable {
-	String username
+	
 	String branch	
 	String wdir = System.getenv()['WDIR'];	
 	String projectDir
@@ -170,6 +172,7 @@ def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
+/*
 ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
 ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
 ola.svn().commit();
@@ -177,7 +180,7 @@ ola.svn().commit();
 siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
 siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
 siv.svn().commit();
-
+*/
 per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
 per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
 per.svn().commit();
