@@ -6,11 +6,12 @@ Exit /b
 :DOIT
 @echo on
 
+cd %WDIR%\devs\siv
+call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username siv --password secure
+
 cd %WDIR%\devs\ola
 call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username ola --password secure
 
 cd %WDIR%\devs\per
 call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username per --password secure
 
-cd %WDIR%\devs\siv
-call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username siv --password secure

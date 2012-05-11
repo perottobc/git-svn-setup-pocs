@@ -51,6 +51,9 @@ call git push origin
 cd %WDIR%\devs\adm
 call git clone -o mirror ./websites.git/ websites.commit-repo
 
+call git config user.name "adm"
+call git config user.email "adm@doit.com"
+
 cd websites.commit-repo 
 call git checkout -t mirror/trunk
 call git pull --rebase
