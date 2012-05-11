@@ -1,5 +1,6 @@
-class GitExecutable {
+class ScmExecutable {
     String gitRepoDir;
+    String svnRepoDir;
 	def ant = new AntBuilder();
 	
 	def git(String command ) {
@@ -7,7 +8,7 @@ class GitExecutable {
 	}
 	
 	def git(String command,String argument) {		
-		println(command + " " + argument );		
+		println("GIT: " + command + " " + argument );		
 		ant.exec(executable:"git",dir:gitRepoDir,resultproperty:"cmdExit") {
 			arg(value:command)
 			if( "" != argument ) { 
@@ -16,15 +17,33 @@ class GitExecutable {
 		}
 		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );						
 	}
+	
+	def svn(String command,String argument) {		
+		println("SVN: " + command + " " + argument + " on " + svnRepoDir );		
+		ant.exec(executable:"svn",dir:svnRepoDir,resultproperty:"cmdExit") {
+			arg(value:command)
+			if( "" != argument ) { 
+				arg(value:argument)
+			}
+		}		
+		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );						
+	}	
 }
 
-class Dev extends GitExecutable {
+enum SCM {
+    svn, git
+}
+
+
+class Dev extends ScmExecutable {
 	String username
 	String branch	
 	String wdir = System.getenv()['WDIR'];	
 	String projectDir
 	String currentFile
-	List addedFiles
+	List addedFiles	
+	SCM currentSCM
+	String svn_branch;
 	
 	public Dev(String _username) {		
 		this( _username, "git_websites" ) 		
@@ -33,10 +52,12 @@ class Dev extends GitExecutable {
 	public Dev(String _username, String git_project_name ) {		
 		if( null == wdir ) throw new RuntimeException("Env variable WDIR must be set");		
 		username=_username;				
-		gitRepoDir=wdir+"/devs/"+username+"/" + git_project_name;		
+		gitRepoDir=wdir+"/devs/"+username+"/" + git_project_name;
+		svnRepoDir=wdir+"/devs/"+username+"/svn_websites";		
 	}
 
 	def git() {	    
+		currentSCM = SCM.git
 		println( "--- " + username + " Working on git repo --- " );
 		addedFiles = new ArrayList(); 
 		return this;		
@@ -66,7 +87,11 @@ class Dev extends GitExecutable {
 	}
 	
 	def commit() {
-		git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
+		if( SCM.git == currentSCM ) 
+			git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
+		else
+		    svn("commit", "-m'NO COMMENT YET'" );
+		    
 		return this;
 	}
 
@@ -88,12 +113,19 @@ class Dev extends GitExecutable {
 	}
 		
 	// -- SVN STUFF
-	def svn() {	    
+	def svn() {	 
+		currentSCM = SCM.svn   
 		println( "--- " + username + " Working on svn repo ---" );		
 		return this;		
 	}
 	
 	def goto_branch( String branch ) {
+		svn_branch = "branches/" + branch;
+		return this;
+	}
+	
+	def goto_trunk() {
+		svn_branch = "trunk";
 		return this;
 	}
 	
@@ -103,6 +135,12 @@ class Dev extends GitExecutable {
 	}
 	
 	def append( String content ) {
+		 
+		def fileToAppend = svnRepoDir + "/" + svn_branch + "/" + projectDir + "/" + currentFile
+		
+		println( "Adding <" + content + "> to ["+fileToAppend+"]");  
+				
+		ant.echo(file:fileToAppend,append:true,message:System.getProperty("line.separator")+content);
 		
 		return this;
 	}
@@ -123,7 +161,6 @@ class Dev extends GitExecutable {
 	def svn_dcommit() {
 		return this;
 	}
-	
 	
 	
 }
@@ -147,15 +184,27 @@ per.git().checkout( "trunk").chdir("web/src/main/webapp").add( "per-baz.html", "
 per.svn().commit();
 */
 
+def ant = new AntBuilder();
+ant.exec(executable:"svn", resultproperty:"cmdExit")
+
+
+per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
+per.svn().commit();
+
+/*
 jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 jenkins.git().checkout( "kaksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 jenkins.git().checkout( "yksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
 
 println("VERIFY")
+*/
 
 /*
 ola.git().checkout( "kaksi" ).chdir( "web" ).touch_and_add( "readme.txt" ).commit().push();
 */
+
+
+
 
 
 
