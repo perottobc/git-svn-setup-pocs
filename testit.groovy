@@ -28,6 +28,10 @@ class ScmExecutable {
 			if( "" != argument ) { 
 				arg(value:argument)
 			}
+			arg(value:"--username")
+			arg(value:username)
+			arg(value:"--password")
+			arg(value:"secure")
 		}		
 		if( "0" != "${ant.project.properties.cmdExit}" ) throw new RuntimeException("Error executing ant command: " + command );						
 	}	
@@ -88,7 +92,7 @@ class Dev extends ScmExecutable {
 		if( SCM.git == currentSCM ) 
 			git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
 		else
-		    svn("commit", "-m'Commit from svn-user'" );
+		    svn("commit", "-m'Commit from svn-user ["+username+"]'" );
 		    
 		return this;
 	}

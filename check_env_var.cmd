@@ -1,6 +1,6 @@
+@echo off
 SET HTPASSWD_EXE="C:\Program Files (x86)\Apache Software Foundation\Apache2.2\bin\htpasswd"
 
-@echo off
 if "%WDIR%" == "" GOTO WDIR_EXIT
 @echo Working directory set to %WDIR%
 
@@ -11,7 +11,7 @@ if '%EDITOR%' == '' GOTO EDITOR_EXIT
 
 GOTO CONTINUE_SETUP
 
-:WDIR
+:WDIR_EXIT
 @echo Define working directory where testing will be done, e.g.:  set WDIR=e:\
 Exit /b
 
@@ -21,3 +21,4 @@ Exit /b
 
 :CONTINUE_SETUP
 SET ENV_CHECKED=OK
+@echo htpasswd set to default: %HTPASSWD_EXE%
