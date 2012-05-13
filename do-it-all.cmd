@@ -10,5 +10,5 @@ rmdir %WDIR% /S/Q
 mkdir %WDIR%
 
 
-call all.1.cmd
-call test
+call setup-all.cmd
+call groovy test.groovy

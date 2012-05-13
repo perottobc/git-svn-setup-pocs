@@ -273,5 +273,3 @@ adm.assert_svn_file_exists( "/branches/yksi/web/src/main/webapp/siv-bar-view.htm
 adm.assert_svn_file_contains( "/branches/yksi/model/src/main/mod/domain.mod", "SivBar" );
 println( "------------------------------------------------------------------------")
 println()
-
-

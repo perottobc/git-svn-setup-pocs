@@ -1,5 +1,8 @@
 @echo off
 
+if "%SCRIPT_DIR%" == "" GOTO SCRIPT_DIR_EXIT
+@echo Info: Script directory set to %SCRIPT_DIR%
+
 if "%WDIR%" == "" GOTO WDIR_EXIT
 @echo Info: Working directory set to %WDIR%
 
@@ -10,6 +13,10 @@ if '%HTPASSWD_EXE%' == '' GOTO HTPASSWD_EXE_EXIT
 @echo Info: htpasswd set to %HTPASSWD_EXE%
 
 GOTO CONTINUE_SETUP
+
+:SCRIPT_DIR_EXIT
+@echo Error: Script working directory must be set, e.g. set SCRIPT_DIR=c:\git-svn
+Exit /b
 
 :WDIR_EXIT
 @echo Error: Define working directory where testing will be done, e.g.:  set WDIR=e:\
