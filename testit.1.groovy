@@ -205,7 +205,7 @@ class Dev extends ScmExecutable {
 		
 		Boolean matchFound = false;
 		input.eachLine { line ->
-			println( "Line: " +  line )
+			println( "    " +  line )
 			if( line.contains( text ) ) matchFound = true;  
 		}
 		
@@ -256,8 +256,8 @@ println()
 
 println( "--------------- SCENARIO 4 ---------------------------------------------")
 println( "Given that per modifies a file on the trunk in his svn repo and commits it")
-println( "When he pushes two new files on the trunk via the git bare-repo")  
-println( "Then the admin can run the gatekeeper and see the updated svn file and the two new files on the trunk")
+println( "When he pushes two new files on the trunk via the git svn gatekeeper")  
+println( "Then the admin can see the updated svn file and the two new files on the trunk")
 println( "--")
 per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" ).commit();
 per.git().checkout( "svn/trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
@@ -268,41 +268,32 @@ adm.assert_svn_file_contains( "/trunk/model/src/main/mod/domain.mod", "PerBaz" )
 println( "------------------------------------------------------------------------")
 println()
 
+println( "--------------- SCENARIO 5 ---------------------------------------------")
+println( "Given that ola modifies a file on the branch/kaksi in his svn repo and commits it")
+println( "When he pushes two new files on the branch/kaksi via the git svn gatekeeper")  
+println( "Then the admin can see the updated svn file and the two new files on the branch/kaksi")
+println( "--")
+ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" ).commit();
+ola.git().checkout( "svn/kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("kaksi").svn( "up" )
+adm.assert_svn_file_exists( "/branches/kaksi/web/src/main/webapp/ola-foo.html" );
+adm.assert_svn_file_exists( "/branches/kaksi/web/src/main/webapp/ola-foo-view.html" );
+adm.assert_svn_file_contains( "/branches/kaksi/model/src/main/mod/domain.mod", "OlaFoo" );
+println( "------------------------------------------------------------------------")
+println()
 
-/*
-ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
-ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
-ola.svn().commit();
-
-
-siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
-siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
-siv.svn().commit();
-
-
-jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
-jenkins.git().checkout( "kaksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
-jenkins.git().checkout( "yksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
+println( "--------------- SCENARIO 6 ---------------------------------------------")
+println( "Given that siv modifies a file on the branch/yksi in here svn repo and commits it")
+println( "When she pushes two new files on the branch/yksi via the git svn gatekeeper")  
+println( "Then the admin can see the updated svn file and the two new files on the branch/kaksi")
+println( "--")
+siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" ).commit();
+siv.git().checkout( "svn/yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("yksi").svn( "up" )
+adm.assert_svn_file_exists( "/branches/yksi/web/src/main/webapp/siv-bar.html" );
+adm.assert_svn_file_exists( "/branches/yksi/web/src/main/webapp/siv-bar-view.html" );
+adm.assert_svn_file_contains( "/branches/yksi/model/src/main/mod/domain.mod", "SivBar" );
+println( "------------------------------------------------------------------------")
+println()
 
 
-
-
-
-
-
-
-  

@@ -9,5 +9,6 @@ Exit /b
 rmdir %WDIR% /S/Q
 mkdir %WDIR%
 
+
 call all.1.cmd
 call test
