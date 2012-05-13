@@ -119,6 +119,13 @@ class Dev extends ScmExecutable {
 		return this;
 	}
 		
+	def remove(String file) {		
+		def fullFilePath = gitRepoDir + "/" + projectDir + "/" + file;
+	    println( "remove: " +  fullFilePath )
+	    git("pull", "--rebase").git("rm", projectDir + "/" + file ).git( "commit", "-m'"+username+" removed ["+file+"]'").git("push");	    
+		return this;
+	}
+		
 	def svn() {	 
 		currentSCM = SCM.svn   
 		println( "--- " + username + " Working on svn repo ---" );		
@@ -169,7 +176,7 @@ class Dev extends ScmExecutable {
 		def input = new File(fileWithFullPath )
 		assert input.exists() 
 		assert input.canRead()
-		println( "File exists" );
+		println( "File exists => assertion OK" );
 	}
 	
 	def assert_svn_file_contains( String file, String text ) {
@@ -189,9 +196,16 @@ class Dev extends ScmExecutable {
 		
 		if( !matchFound ) throw new RuntimeException("AssertError: ["+text+"] not found in ["+fileWithFullPath+"]" );
 		
-		println( "Text found" );
+		println( "Text found => assertion OK" );
 	}
-		
+	
+	def assert_svn_file_not_exists( String file ) {
+		def fileWithFullPath = svnRepoDir + file;
+		println( "Assert that ["+fileWithFullPath+"] not exists" );
+		def input = new File(fileWithFullPath )		
+		assert !input.exists()
+		println( "File not found => assertion OK" ); 	
+	}		
 }
 
 def adm = new Dev( "adm", "websites" );
@@ -273,3 +287,14 @@ adm.assert_svn_file_exists( "/branches/yksi/web/src/main/webapp/siv-bar-view.htm
 adm.assert_svn_file_contains( "/branches/yksi/model/src/main/mod/domain.mod", "SivBar" );
 println( "------------------------------------------------------------------------")
 println()
+
+println( "--------------- SCENARIO 7 ---------------------------------------------")
+println( "Given that siv adds a file on the trunk and pushes it to the bare, which is then delete by per")
+println( "When gatekeeper does it's merge back to subversion")  
+println( "Then the admin can't see the file")
+siv.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "siv-next-solution.txt" ).commit().push();
+per.git().checkout( "svn/trunk" ).chdir( "web" ).remove( "siv-next-solution.txt" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
+adm.assert_svn_file_not_exists( "/trunk/web/siv-next-solution.txt" );
+
+
