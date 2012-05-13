@@ -180,6 +180,20 @@ def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
+ola.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "gatekeeper.txt" ).touch_and_add( "refactored.txt" ).commit().push();
+
+//jenkins.git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
+//jenkins.git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git("svn", "fetch").git( "rebase", "remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
+/*
+jenkins.git( "checkout", "kaksi" )
+jenkins.git( "fetch", "bare_repo" )
+jenkins.git( "rebase", "remotes/bare_repo/svn/kaksi" )
+jenkins.git( "svn","reset","1000")
+jenkins.git( "svn","rebase")
+jenkins.git( "svn","dcommit")
+*/
+
+/*
 ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme1.txt" ).commit().push();
 siv.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme2.txt" ).commit().push();
 per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme3.txt" ).commit().push();
@@ -231,3 +245,4 @@ per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme12.txt" )
 jenkins.dcommit_to_svn_2();
 
 println("Please verify!")
+*/
