@@ -71,7 +71,7 @@ class Dev extends ScmExecutable {
 	def checkout(String branch) {
 		this.branch = branch;
 		git("checkout",branch);
-		git("pull");
+		git("pull", "--rebase");
 		return this;
 	}
 	
@@ -152,6 +152,7 @@ class Dev extends ScmExecutable {
 		
 		if( SCM.git == currentSCM ) {
 			fileToAppend = gitRepoDir + "/" + projectDir + "/" + currentFile;
+			git( "pull", "--rebase");
 		}
 				
 		println( "Adding <" + content + "> to ["+fileToAppend+"]");  				
@@ -190,8 +191,7 @@ class Dev extends ScmExecutable {
 		println( "File exists => assertion OK" );
 	}
 	
-	def assert_svn_file_contains( String file, String text ) {
-	
+	def assert_svn_file_contains( String file, String text ) {	
 		def fileWithFullPath = svnRepoDir + file;
 		println( "Assert that ["+fileWithFullPath+"] contains ["+text+"]" );
 		def input = new File(fileWithFullPath )
@@ -209,6 +209,26 @@ class Dev extends ScmExecutable {
 		
 		println( "Text found => assertion OK" );
 	}
+	
+	def assert_svn_file_not_contains( String file, String text ) {	
+		def fileWithFullPath = svnRepoDir + file;
+		println( "Assert that ["+fileWithFullPath+"] does not contain ["+text+"]" );
+		def input = new File(fileWithFullPath )
+		
+		assert input.exists() 
+		assert input.canRead()
+		
+		Boolean matchFound = false;
+		input.eachLine { line ->
+			println( "    " +  line )
+			if( line.contains( text ) ) matchFound = true;  
+		}
+		
+		if( matchFound ) throw new RuntimeException("AssertError: ["+text+"] found in ["+fileWithFullPath+"]" );
+		
+		println( "Text not found => assertion OK" );
+	}
+	
 	
 	def assert_svn_file_not_exists( String file ) {
 		def fileWithFullPath = svnRepoDir + file;
@@ -319,4 +339,35 @@ adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
 adm.assert_svn_file_contains( "/trunk/web/siv-x2-solution.txt", "SivSuggestion" );
 adm.assert_svn_file_contains( "/trunk/web/siv-x2-solution.txt", "PerSuggestion" );
 
+println( "--------------- SCENARIO 9 ---------------------------------------------")
+println( "Given that siv extends the readme.txt on yksi ");
+println( "    and ola cherry-picks siv's commit on kaksi + makes hos his own extension");
+println( "    and per cherry-picks siv and ola's commit on trunk + makes hos his own extension");
+println( "When gatekeeper does the merge back to subversion")  
+println( "Then the admin can see the changes by siv on yksi, by ola on kaksi and on the trunk by per")
+
+siv.git().checkout( "svn/trunk" ).git( "pull", "--rebase" )
+siv.checkout( "svn/yksi" ).chdir( "web" ).on_file( "readme.txt" ).append( "Siv->Web2.0Rocks-YouKnow" ).commit().push();
+
+ola.git().checkout( "svn/kaksi" ).git( "cherry-pick", "remotes/origin/svn/yksi~0");
+ola.chdir( "web" ).on_file( "readme.txt" ).append( "Ola->JavaScriptRocksYouKnow" ).commit().push();
+
+per.git().checkout( "svn/trunk" ).git( "cherry-pick", "remotes/origin/svn/yksi~0").git( "cherry-pick", "remotes/origin/svn/kaksi~0");
+per.chdir( "web" ).on_file( "readme.txt" ).append( "Per->GitRocksYouKnow" ).commit().push();
+
+adm.gatekeeper_update_svn_from_bare("yksi").svn( "up" )
+adm.gatekeeper_update_svn_from_bare("kaksi").svn( "up" )
+adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
+
+adm.assert_svn_file_contains( "/branches/yksi/web/readme.txt", "Siv->Web2.0Rocks-YouKnow" );
+adm.assert_svn_file_not_contains( "/branches/yksi/web/readme.txt", "Ola->JavaScriptRocksYouKnow" );
+adm.assert_svn_file_not_contains( "/branches/yksi/web/readme.txt", "Per->GitRocksYouKnow" );
+
+adm.assert_svn_file_contains( "/branches/kaksi/web/readme.txt", "Siv->Web2.0Rocks-YouKnow" );
+adm.assert_svn_file_contains( "/branches/kaksi/web/readme.txt", "Ola->JavaScriptRocksYouKnow" );
+adm.assert_svn_file_not_contains( "/branches/kaksi/web/readme.txt", "Per->GitRocksYouKnow" );
+
+adm.assert_svn_file_contains( "/trunk/web/readme.txt", "Siv->Web2.0Rocks-YouKnow" );
+adm.assert_svn_file_contains( "/trunk/web/readme.txt", "Ola->JavaScriptRocksYouKnow" );
+adm.assert_svn_file_contains( "/trunk/web/readme.txt", "Per->GitRocksYouKnow" );
 
