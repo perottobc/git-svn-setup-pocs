@@ -6,6 +6,10 @@ Exit /b
 :DOIT
 @echo on
 
+mkdir %WDIR%\devs\adm
+cd %WDIR%\devs\adm
+call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username adm --password secure
+
 mkdir %WDIR%\devs\per
 cd %WDIR%\devs\per
 call svn co http://localhost/svn-repos/company-repo/websites svn_websites --username per --password secure

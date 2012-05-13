@@ -22,13 +22,15 @@ class ScmExecutable {
 		return this;						
 	}
 	
-	def svn(String command,String argument) {		
-		println(username + "/svn: " + command + " " + argument + " on " + svnRepoDir );		
+	def svn(String command,String ... arguments) {		
+		println(username + "/svn: " + command + " " + arguments + " on " + svnRepoDir );		
 		ant.exec(executable:"svn",dir:svnRepoDir,resultproperty:"cmdExit") {
 			arg(value:command)
-			if( "" != argument ) { 
+
+			for( argument in arguments ) { 
 				arg(value:argument)
 			}
+
 			arg(value:"--username")
 			arg(value:username)
 			arg(value:"--password")
@@ -167,82 +169,47 @@ class Dev extends ScmExecutable {
 		return this;
 	}
 	
+	def gatekeeper_update_svn_from_bare(branch) {	
+		git( "checkout", branch )
+		git( "fetch", "bare_repo" )
+		git( "rebase", "remotes/bare_repo/svn/" + branch)
+		git( "svn", "reset", "2147483647" )
+		git( "svn", "rebase" )
+		git( "svn", "dcommit" )
+	}
+	
+
 	def dcommit_to_svn_2() {
 		git( "fetch", "bare_repo" ).git( "checkout", "svn/trunk" ).git( "merge", "--no-ff","remotes/bare_repo/svn/trunk" ).git( "svn","dcommit");
 		git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
 		git( "fetch", "bare_repo" ).git( "checkout", "svn/yksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/yksi" ).git( "svn","dcommit");	
-	} 
+	}
 	
+	def assert_svn_file_exists( String file ) {
+		def input = new File(svnRepoDir + file )
+		assert input.exists() 
+		assert input.canRead()
+		println( "File exists: " + file );
+	}
+	
+		
 }
 
-def jenkins = new Dev( "adm", "websites" );
+def adm = new Dev( "adm", "websites" );
 def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
-ola.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "gatekeeper.txt" ).touch_and_add( "refactored.txt" ).commit().push();
 
-//jenkins.git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
-//jenkins.git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git("svn", "fetch").git( "rebase", "remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
-/*
-jenkins.git( "checkout", "kaksi" )
-jenkins.git( "fetch", "bare_repo" )
-jenkins.git( "rebase", "remotes/bare_repo/svn/kaksi" )
-jenkins.git( "svn","reset","1000")
-jenkins.git( "svn","rebase")
-jenkins.git( "svn","dcommit")
-*/
+// S1:
+println( "Given that per checkout trunk and push a new file to the bare-repo")
+println( "the gatekeeper runs and updates his svn repo")
+println( "the admin can see the new file on the trunk of the subversion repo")
+println( "--start -----------------------------------------------------------------")
 
-/*
-ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme1.txt" ).commit().push();
-siv.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme2.txt" ).commit().push();
-per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme3.txt" ).commit().push();
+per.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "readme-from-per.txt" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
+adm.assert_svn_file_exists( "/trunk/web/readme-from-per.txt" );
 
-jenkins.dcommit_to_svn_2();
-
-ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
-ola.git().checkout( "svn/kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
-ola.svn().commit();
-
-ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme4.txt" ).commit().push();
-siv.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme5.txt" ).commit().push();
-per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme6.txt" ).commit().push();
-
-jenkins.dcommit_to_svn_2();
-
-per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
-per.git().checkout( "svn/trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
-per.svn().commit();
-
-siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
-siv.git().checkout( "svn/yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
-siv.svn().commit();
-
-ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme7.txt" ).commit().push();
-siv.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme8.txt" ).commit().push();
-per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme9.txt" ).commit().push();
-
-jenkins.dcommit_to_svn_2();
-
-ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
-ola.git().checkout( "svn/kaksi").chdir("web/src/main/webapp").add( "ola-foo2.html", "ola-foo-view2.html" ).commit().push();
-ola.svn().commit();
-
-per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" );
-per.git().checkout( "svn/trunk").chdir("web/src/main/webapp").add( "per-baz2.html", "per-baz-view2.html" ).commit().push();
-per.svn().commit();
-
-jenkins.dcommit_to_svn_2();
-
-siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
-siv.git().checkout( "svn/yksi").chdir("web/src/main/webapp").add( "siv-bar2.html", "siv-bar-view2.html" ).commit().push();
-siv.svn().commit();
-
-ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme10.txt" ).commit().push();
-siv.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme11.txt" ).commit().push();
-per.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme12.txt" ).commit().push();
-
-jenkins.dcommit_to_svn_2();
-
-println("Please verify!")
-*/
+println( "--end -----------------------------------------------------------------")
+  

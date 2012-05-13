@@ -34,6 +34,12 @@ call git push ../websites.git "refs/remotes/svn/*:refs/heads/svn/*"
 call git remote add bare_repo ../websites.git
 call git fetch bare_repo
 
+@echo -----------------------------------
+@echo 5. Create svn tracking branches in gatekeeper
+call git checkout -t svn/trunk
+call git checkout -t svn/yksi
+call git checkout -t svn/kaksi
+
 
 :: Howto sync on gatekeeper
 ::  1.
