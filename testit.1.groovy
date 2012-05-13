@@ -119,7 +119,6 @@ class Dev extends ScmExecutable {
 		return this;
 	}
 		
-	// -- SVN STUFF
 	def svn() {	 
 		currentSCM = SCM.svn   
 		println( "--- " + username + " Working on svn repo ---" );		
@@ -145,27 +144,6 @@ class Dev extends ScmExecutable {
 		def fileToAppend = svnRepoDir + "/" + svn_branch + "/" + projectDir + "/" + currentFile		
 		println( "Adding <" + content + "> to ["+fileToAppend+"]");  				
 		ant.echo(file:fileToAppend,append:true,message:System.getProperty("line.separator")+content);		
-		return this;
-	}
-	
-	// jenkins
-	def pull( String option ) {
-		git("pull",option);
-		return this;
-	}
-	
-	def svn_reset( Integer revision ) {
-		git("svn","reset",revision.toString());
-		return this;
-	}
-
-	def svn_rebase() {
-		git("svn","rebase");
-		return this;
-	}
-	
-	def svn_dcommit() {
-		git("svn","dcommit");
 		return this;
 	}
 	
