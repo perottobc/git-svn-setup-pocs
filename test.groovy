@@ -46,7 +46,7 @@ class Dev extends ScmExecutable {
 	String wdir = System.getenv()['WDIR'];	
 	String projectDir
 	String currentFile
-	List addedFiles	
+	List gitChanges	
 	SCM currentSCM
 	String svn_branch;
 	
@@ -64,7 +64,7 @@ class Dev extends ScmExecutable {
 	def git() {	    
 		currentSCM = SCM.git
 		println( "--- " + username + " Working on git repo --- " );
-		addedFiles = new ArrayList(); 
+		gitChanges = new ArrayList(); 
 		return this;		
 	}
 		
@@ -86,7 +86,7 @@ class Dev extends ScmExecutable {
 		for( file in files ) {
 			ant.copy(file:"./dev_src_templates/" + file,todir:targetDir );
 			git("add",targetDir + "/" + file );
-			addedFiles.add( file );
+			gitChanges.add( "added: " + file );
 		}
 		
 		return this;
@@ -94,7 +94,7 @@ class Dev extends ScmExecutable {
 	
 	def commit() {
 		if( SCM.git == currentSCM ) 
-			git("commit","-m'"+username+" added "+ addedFiles +" on "+branch+"'");
+			git("commit","-m'"+username+" changes: "+ gitChanges +" on "+branch+"'");
 		else
 		    svn("commit", "-m'Commit from svn-user ["+username+"]'" );
 		    
@@ -115,7 +115,7 @@ class Dev extends ScmExecutable {
 			arg(value:file)
 		}
 		git("add", fullFilePath );
-		addedFiles.add( file );
+		gitChanges.add( "added: " + file );
 		return this;
 	}
 		
@@ -148,9 +148,20 @@ class Dev extends ScmExecutable {
 	}
 	
 	def append( String content ) {		 
-		def fileToAppend = svnRepoDir + "/" + svn_branch + "/" + projectDir + "/" + currentFile		
+		def fileToAppend = svnRepoDir + "/" + svn_branch + "/" + projectDir + "/" + currentFile
+		
+		if( SCM.git == currentSCM ) {
+			fileToAppend = gitRepoDir + "/" + projectDir + "/" + currentFile;
+		}
+				
 		println( "Adding <" + content + "> to ["+fileToAppend+"]");  				
-		ant.echo(file:fileToAppend,append:true,message:System.getProperty("line.separator")+content);		
+		ant.echo(file:fileToAppend,append:true,message:System.getProperty("line.separator")+content);
+		
+		if( SCM.git == currentSCM ) {
+			git( "add", fileToAppend );
+			gitChanges.add( content + " appended to " + fileToAppend  ) 
+		}
+				
 		return this;
 	}
 	
@@ -290,11 +301,22 @@ println()
 
 println( "--------------- SCENARIO 7 ---------------------------------------------")
 println( "Given that siv adds a file on the trunk and pushes it to the bare, which is then delete by per")
-println( "When gatekeeper does it's merge back to subversion")  
+println( "When gatekeeper does the merge back to subversion")  
 println( "Then the admin can't see the file")
 siv.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "siv-next-solution.txt" ).commit().push();
 per.git().checkout( "svn/trunk" ).chdir( "web" ).remove( "siv-next-solution.txt" ).commit().push();
 adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
 adm.assert_svn_file_not_exists( "/trunk/web/siv-next-solution.txt" );
+
+println( "--------------- SCENARIO 8 ---------------------------------------------")
+println( "Given that siv adds a file on the trunk and pushes it to the bare, which is then edited by per")
+println( "When gatekeeper does the merge back to subversion")  
+println( "Then the admin can see the file as it is editet by per")
+siv.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "siv-x2-solution.txt" ).commit().push();
+siv.git().on_file( "siv-x2-solution.txt" ).append( "SivSuggestion" ).commit().push();
+per.git().checkout( "svn/trunk" ).chdir( "web" ).on_file("siv-x2-solution.txt").append( "PerSuggestion" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
+adm.assert_svn_file_contains( "/trunk/web/siv-x2-solution.txt", "SivSuggestion" );
+adm.assert_svn_file_contains( "/trunk/web/siv-x2-solution.txt", "PerSuggestion" );
 
 
