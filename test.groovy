@@ -166,20 +166,17 @@ class Dev extends ScmExecutable {
 		return this;
 	}
 	
-	def gatekeeper_update_svn_from_bare(branch) {	
+	def gatekeeper_update_svn_from_bare(branch) {
+		
 		git( "checkout", branch )
 		git( "fetch", "bare_repo" )
 		git( "rebase", "remotes/bare_repo/svn/" + branch)
 		git( "svn", "reset", "2147483647" )
 		git( "svn", "rebase" )
 		git( "svn", "dcommit" )
-	}
 	
-
-	def dcommit_to_svn_2() {
-		git( "fetch", "bare_repo" ).git( "checkout", "svn/trunk" ).git( "merge", "--no-ff","remotes/bare_repo/svn/trunk" ).git( "svn","dcommit");
-		git( "fetch", "bare_repo" ).git( "checkout", "svn/kaksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/kaksi" ).git( "svn","dcommit");
-		git( "fetch", "bare_repo" ).git( "checkout", "svn/yksi" ).git( "merge", "--no-ff","remotes/bare_repo/svn/yksi" ).git( "svn","dcommit");	
+		// Alternative, doesn't work, gets merge conflict on the second pass
+		// git( "fetch", "bare_repo" ).git( "checkout", "svn/" + branch ).git( "merge", "--no-ff","remotes/bare_repo/svn/trunk" ).git( "svn","dcommit");
 	}
 	
 	def assert_svn_file_exists( String file ) {
