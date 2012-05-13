@@ -186,12 +186,33 @@ class Dev extends ScmExecutable {
 	}
 	
 	def assert_svn_file_exists( String file ) {
-		def input = new File(svnRepoDir + file )
+		def fileWithFullPath = svnRepoDir + file;
+		println( "Assert that ["+fileWithFullPath+"] exists" );
+		def input = new File(fileWithFullPath )
 		assert input.exists() 
 		assert input.canRead()
-		println( "File exists: " + file );
+		println( "File exists" );
 	}
 	
+	def assert_svn_file_contains( String file, String text ) {
+	
+		def fileWithFullPath = svnRepoDir + file;
+		println( "Assert that ["+fileWithFullPath+"] contains ["+text+"]" );
+		def input = new File(fileWithFullPath )
+		
+		assert input.exists() 
+		assert input.canRead()
+		
+		Boolean matchFound = false;
+		input.eachLine { line ->
+			println( "Line: " +  line )
+			if( line.contains( text ) ) matchFound = true;  
+		}
+		
+		if( !matchFound ) throw new RuntimeException("AssertError: ["+text+"] not found in ["+fileWithFullPath+"]" );
+		
+		println( "Text found" );
+	}
 		
 }
 
@@ -200,16 +221,88 @@ def per = new Dev("per");
 def siv = new Dev("siv");
 def ola = new Dev("ola");
 
-
-// S1:
+println( "--------------- SCENARIO 1 ---------------------------------------------")
 println( "Given that per checkout trunk and push a new file to the bare-repo")
-println( "the gatekeeper runs and updates his svn repo")
-println( "the admin can see the new file on the trunk of the subversion repo")
-println( "--start -----------------------------------------------------------------")
-
+println( "When the gatekeeper runs and updates the svn repo")
+println( "Then the admin can see the new file on the trunk of the subversion repo")
+println( "--")
 per.git().checkout( "svn/trunk" ).chdir( "web" ).touch_and_add( "readme-from-per.txt" ).commit().push();
 adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
 adm.assert_svn_file_exists( "/trunk/web/readme-from-per.txt" );
+println( "------------------------------------------------------------------------")
+println()
+ 
+println( "--------------- SCENARIO 2 ---------------------------------------------")
+println( "Given that ola checkout kaksi and push a new file to the bare-repo")
+println( "When the gatekeeper runs and updates the svn repo")
+println( "Then the admin can see the new file on the kaksi-branch of the subversion repo")
+println( "--")
+ola.git().checkout( "svn/kaksi" ).chdir( "web" ).touch_and_add( "readme-from-ola.txt" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("kaksi").svn( "up" )
+adm.assert_svn_file_exists( "/branches/kaksi/web/readme-from-ola.txt" );
+println( "------------------------------------------------------------------------")
+println()
 
-println( "--end -----------------------------------------------------------------")
+println( "--------------- SCENARIO 3 ---------------------------------------------")
+println( "Given that siv checkout yksi and push a new file to the bare-repo")
+println( "When the gatekeeper runs and updates the svn repo")
+println( "Then the admin can see the new file on the yksi-branch of the subversion repo")
+println( "--")
+siv.git().checkout( "svn/yksi" ).chdir( "web" ).touch_and_add( "readme-from-siv.txt" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("yksi").svn( "up" )
+adm.assert_svn_file_exists( "/branches/yksi/web/readme-from-siv.txt" );
+println( "------------------------------------------------------------------------")
+println()
+
+println( "--------------- SCENARIO 4 ---------------------------------------------")
+println( "Given that per modifies a file on the trunk in his svn repo and commits it")
+println( "When he pushes two new files on the trunk via the git bare-repo")  
+println( "Then the admin can run the gatekeeper and see the updated svn file and the two new files on the trunk")
+println( "--")
+per.svn().goto_trunk().chdir("model/src/main/mod").on_file( "domain.mod" ).append( "PerBaz" ).commit();
+per.git().checkout( "svn/trunk").chdir("web/src/main/webapp").add( "per-baz.html", "per-baz-view.html" ).commit().push();
+adm.gatekeeper_update_svn_from_bare("trunk").svn( "up" )
+adm.assert_svn_file_exists( "/trunk/web/src/main/webapp/per-baz.html" );
+adm.assert_svn_file_exists( "/trunk/web/src/main/webapp/per-baz-view.html" );
+adm.assert_svn_file_contains( "/trunk/model/src/main/mod/domain.mod", "PerBaz" );
+println( "------------------------------------------------------------------------")
+println()
+
+
+/*
+ola.svn().goto_branch( "kaksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "OlaFoo" );
+ola.git().checkout( "kaksi").chdir("web/src/main/webapp").add( "ola-foo.html", "ola-foo-view.html" ).commit().push();
+ola.svn().commit();
+
+
+siv.svn().goto_branch( "yksi").chdir("model/src/main/mod").on_file( "domain.mod" ).append( "SivBar" );
+siv.git().checkout( "yksi").chdir("web/src/main/webapp").add( "siv-bar.html", "siv-bar-view.html" ).commit().push();
+siv.svn().commit();
+
+
+jenkins.git().checkout( "trunk").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
+jenkins.git().checkout( "kaksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
+jenkins.git().checkout( "yksi").pull("--rebase").svn_reset(2147483647).svn_rebase().svn_dcommit();
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
