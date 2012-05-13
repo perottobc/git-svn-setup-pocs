@@ -175,7 +175,7 @@ class Dev extends ScmExecutable {
 		git( "svn", "rebase" )
 		git( "svn", "dcommit" )
 	
-		// Alternative, doesn't work, gets merge conflict on the second pass
+		// Alternative, doesn't work, gets merge conflict on the second passgit 
 		// git( "fetch", "bare_repo" ).git( "checkout", "svn/" + branch ).git( "merge", "--no-ff","remotes/bare_repo/svn/trunk" ).git( "svn","dcommit");
 	}
 	
